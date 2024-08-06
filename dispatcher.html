@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Locations</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+</head>
+<body>
+    <h1>Местоположение водителей</h1>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 5,
+                center: { lat: 0, lng: 0 }
+            });
+
+            fetch('/get-locations')
+                .then(response => response.json())
+                .then(data => {
+                    Object.values(data).forEach(location => {
+                        new google.maps.Marker({
+                            position: { lat: location.latitude, lng: location.longitude },
+                            map: map
+                        });
+                    });
+                });
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
