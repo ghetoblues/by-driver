@@ -18,7 +18,7 @@ def home():
 def dispatcher():
     return render_template('dispatcher.html')
 
-app.route('/start-tracking', methods=['POST'])
+@app.route('/start-tracking', methods=['POST'])
 def start_tracking():
     global tracking_status
     tracking_status = True
