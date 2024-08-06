@@ -1,52 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Location Tracking</title>
+    <title>Tracking</title>
 </head>
 <body>
-    <h1>Отслеживание геолокации водителя</h1>
-    <button id="startTracking">Начать отслеживание</button>
-    <button id="stopTracking">Остановить отслеживание</button>
+    <button id="startTrackingButton">Начать отслеживание</button>
+    <button id="stopTrackingButton">Остановить отслеживание</button>
 
     <script>
-        let watchId;
+        let watchId = null;
 
-        document.getElementById('startTracking').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-                        // Отправка данных на сервер
-                        fetch('/update-location', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ latitude, longitude }),
-                        });
-                    },
-                    (error) => {
-                        console.error('Error getting geolocation', error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
+        document.getElementById('startTrackingButton').addEventListener('click', function() {
+            fetch('/start-tracking', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Tracking is ON');
+                        if (navigator.geolocation) {
+                            watchId = navigator.geolocation.watchPosition(
+                                (position) => {
+                                    const { latitude, longitude } = position.coords;
+                                    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+                                    // Отправка данных на сервер
+                                    fetch('/update-location', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ latitude, longitude }),
+                                    });
+                                },
+                                (error) => {
+                                    console.error('Error getting geolocation', error);
+                                },
+                                {
+                                    enableHighAccuracy: true,
+                                    timeout: 5000,
+                                    maximumAge: 0
+                                }
+                            );
+                        } else {
+                            alert('Geolocation is not supported by this browser.');
+                        }
+                    } else {
+                        alert('Ошибка при запуске отслеживания');
                     }
-                );
-            } else {
-                alert('Geolocation is not supported by this browser.');
-            }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
         });
 
-        document.getElementById('stopTracking').addEventListener('click', () => {
-            if (watchId) {
+        document.getElementById('stopTrackingButton').addEventListener('click', function() {
+            if (watchId !== null) {
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
-                console.log('Tracking stopped');
+                fetch('/stop-tracking', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Tracking is OFF');
+                        } else {
+                            alert('Ошибка при остановке отслеживания');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                    });
+            } else {
+                alert('Tracking is not running');
             }
         });
     </script>
