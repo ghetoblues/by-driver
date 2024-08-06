@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Location Tracking</title>
+</head>
+<body>
+    <h1>Отслеживание геолокации водителя</h1>
+    <button id="startTracking">Начать отслеживание</button>
+    <button id="stopTracking">Остановить отслеживание</button>
+
+    <script>
+        let watchId;
+
+        document.getElementById('startTracking').addEventListener('click', () => {
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+                        // Отправка данных на сервер
+                        fetch('/update-location', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ latitude, longitude }),
+                        });
+                    },
+                    (error) => {
+                        console.error('Error getting geolocation', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        });
+
+        document.getElementById('stopTracking').addEventListener('click', () => {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                console.log('Tracking stopped');
+            }
+        });
+    </script>
+</body>
+</html>
