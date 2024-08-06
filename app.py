@@ -17,33 +17,28 @@ def home():
 def dispatcher():
     return render_template('dispatcher.html')
 
-@app.route('/update-location', methods=['POST'])
-def update_location():
-    data = request.get_json()
-    driver_id = data.get('driver_id', 'default_driver')  # Используйте уникальный идентификатор водителя
-    driver_locations[driver_id] = {
-        'latitude': data['latitude'],
-        'longitude': data['longitude']
-    }
-    return jsonify({'status': 'success'}), 200
-
-@app.route('/start-tracking', methods=['POST'])
+app.route('/start-tracking', methods=['POST'])
 def start_tracking():
-    try:
-        # Логика для начала отслеживания
-        return jsonify({'status': 'success'})
-    except Exception as e:
-        print(f'Ошибка: {e}')
-        return jsonify({'status': 'error'})
+    global tracking_status
+    tracking_status = True
+    return jsonify({'status': 'success'})
 
 @app.route('/stop-tracking', methods=['POST'])
 def stop_tracking():
-    try:
-        # Логика для остановки отслеживания
-        return jsonify({'status': 'success'})
-    except Exception as e:
-        print(f'Ошибка: {e}')
-        return jsonify({'status': 'error'})
+    global tracking_status
+    tracking_status = False
+    return jsonify({'status': 'success'})
+
+@app.route('/update-location', methods=['POST'])
+def update_location():
+    data = request.json
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    print(f'Received location: Latitude: {latitude}, Longitude: {longitude}')
+    
+    # Логика для обработки данных местоположения и определения успешности
+    # В данном примере предполагается, что если данные получены, отслеживание активное
+    return jsonify({'status': 'success'}) if tracking_status else jsonify({'status': 'error'})
 
 @app.route('/get-locations', methods=['GET'])
 def get_locations():
