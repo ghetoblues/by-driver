@@ -18,5 +18,10 @@ def update_location():
 def get_locations():
     return jsonify(driver_locations), 200
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Start Flask app in a separate thread
+def run_flask():
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+# Start bot polling and Flask app
+if __name__ == "__main__":
+    Thread(target=run_flask).start()
