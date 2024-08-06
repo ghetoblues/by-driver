@@ -4,20 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracking</title>
+    <style>
+        #status {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .status-off {
+            color: red;
+        }
+        .status-on {
+            color: green;
+        }
+    </style>
 </head>
 <body>
     <button id="startTrackingButton">Начать отслеживание</button>
     <button id="stopTrackingButton">Остановить отслеживание</button>
+    <div id="status" class="status-off">Tracking is OFF</div>
 
     <script>
         let watchId = null;
+
+        // Функция для обновления статуса
+        function updateStatus(isTracking) {
+            const statusElement = document.getElementById('status');
+            if (isTracking) {
+                statusElement.textContent = 'Tracking is ON';
+                statusElement.className = 'status-on';
+            } else {
+                statusElement.textContent = 'Tracking is OFF';
+                statusElement.className = 'status-off';
+            }
+        }
 
         document.getElementById('startTrackingButton').addEventListener('click', function() {
             fetch('/start-tracking', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        alert('Tracking is ON');
+                        updateStatus(true);
                         if (navigator.geolocation) {
                             watchId = navigator.geolocation.watchPosition(
                                 (position) => {
@@ -30,10 +55,17 @@
                                             'Content-Type': 'application/json',
                                         },
                                         body: JSON.stringify({ latitude, longitude }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'error') {
+                                            updateStatus(false);
+                                        }
                                     });
                                 },
                                 (error) => {
                                     console.error('Error getting geolocation', error);
+                                    updateStatus(false);
                                 },
                                 {
                                     enableHighAccuracy: true,
@@ -43,13 +75,16 @@
                             );
                         } else {
                             alert('Geolocation is not supported by this browser.');
+                            updateStatus(false);
                         }
                     } else {
                         alert('Ошибка при запуске отслеживания');
+                        updateStatus(false);
                     }
                 })
                 .catch(error => {
                     console.error('Ошибка:', error);
+                    updateStatus(false);
                 });
         });
 
@@ -61,7 +96,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.status === 'success') {
-                            alert('Tracking is OFF');
+                            updateStatus(false);
                         } else {
                             alert('Ошибка при остановке отслеживания');
                         }
