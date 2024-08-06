@@ -13,6 +13,10 @@ driver_locations = {}
 def home():
     return render_template('index.html')
 
+@app.route('/dispatcher')
+def dispatcher():
+    return render_template('dispatcher.html')
+
 @app.route('/update-location', methods=['POST'])
 def update_location():
     data = request.get_json()
