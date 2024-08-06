@@ -27,6 +27,24 @@ def update_location():
     }
     return jsonify({'status': 'success'}), 200
 
+@app.route('/start-tracking', methods=['POST'])
+def start_tracking():
+    try:
+        # Логика для начала отслеживания
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f'Ошибка: {e}')
+        return jsonify({'status': 'error'})
+
+@app.route('/stop-tracking', methods=['POST'])
+def stop_tracking():
+    try:
+        # Логика для остановки отслеживания
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        print(f'Ошибка: {e}')
+        return jsonify({'status': 'error'})
+
 @app.route('/get-locations', methods=['GET'])
 def get_locations():
     return jsonify(driver_locations), 200
