@@ -8,6 +8,7 @@ from threading import Thread
 app = Flask(__name__)
 
 driver_locations = {}
+tracking_status = False  # Глобальная переменная для хранения статуса отслеживания
 
 @app.route('/')
 def home():
